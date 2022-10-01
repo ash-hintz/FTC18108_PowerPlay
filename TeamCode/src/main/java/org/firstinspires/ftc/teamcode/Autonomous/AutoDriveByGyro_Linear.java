@@ -29,10 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot;
 import static org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot.DRIVE_SPEED;
@@ -89,41 +87,28 @@ import static org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot.TURN_SPEED
 // @Disabled
 public class AutoDriveByGyro_Linear extends LinearOpMode {
 
-    // Make accessible the methods defined in PowerPlayBot
-    PowerPlayBot ppb = new PowerPlayBot(this);
-
     @Override
     public void runOpMode() {
 
-        ppb.frontLeft = hardwareMap.get(DcMotor.class, "motor0");
-        ppb.frontRight = hardwareMap.get(DcMotor.class, "motor1");
-        ppb.backLeft = hardwareMap.get(DcMotor.class, "motor2");
-        ppb.backRight = hardwareMap.get(DcMotor.class, "motor3");
+        // Make accessible the methods defined in PowerPlayBot
+        // Pass the objects that are only defined once the OpMode starts running
+        PowerPlayBot ppb = new PowerPlayBot(this, hardwareMap);
 
-        // initialize values for IMU
-        ppb.parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
-        ppb.imu = hardwareMap.get(BNO055IMU.class, "imu");
-        ppb.imu.initialize(ppb.parameters);
-
-        // Initialize the drive system variables.
+        // Initialize the drive system variables
         try {
-            telemetry.addData(">", "About to call init()");
-            telemetry.update();
-            sleep(2000);
-
             ppb.init();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Wait for the game to start (Display Gyro value while waiting)
+        // Wait for the game to start (driver presses PLAY) Display IMU value while waiting
         while (opModeInInit()) {
-            telemetry.addData(">", "Robot Heading = %4.0f", ppb.getRawHeading());
+            telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
             telemetry.update();
         }
 
-        // Set the encoders for closed loop speed control, and reset the heading.
-        ppb.resetHeading();
+        // Play just pressed on Driver Station, reset Heading and game timer
+        ppb.runtime.reset();
 
         // Step through each leg of the path,
         // Notes:   Reverse movement is obtained by setting a negative distance (not speed)

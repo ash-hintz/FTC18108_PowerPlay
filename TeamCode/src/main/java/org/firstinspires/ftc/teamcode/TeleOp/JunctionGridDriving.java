@@ -29,12 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.TeleOp;
 
-    import com.qualcomm.hardware.bosch.BNO055IMU;
     import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-    import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-    import com.qualcomm.robotcore.hardware.DcMotor;
-    import com.qualcomm.robotcore.util.ElapsedTime;
     import com.qualcomm.robotcore.util.Range;
+    import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
     import org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot;
     import static org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot.DRIVE_SPEED;
@@ -57,9 +54,6 @@ package org.firstinspires.ftc.teamcode.TeleOp;
     // @Disabled
     public class JunctionGridDriving extends LinearOpMode {
 
-        // Make accessible the methods defined in PowerPlayBot
-        PowerPlayBot ppb = new PowerPlayBot(this);
-
         // Define constants for TETRIX Drivetrain
         // static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
         // static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
@@ -68,76 +62,52 @@ package org.firstinspires.ftc.teamcode.TeleOp;
         //         (WHEEL_DIAMETER_INCHES * 3.1415);
         // static final double     DRIVE_SPEED             = 0.6;
         // static final double     TURN_SPEED              = 0.5;
-        static final int        COUNTS_PER_1_TILE_STANDARD  = 3500;
-        static final int        COUNTS_PER_1_TILE_STRAFE    = 4000;
+        // static final int        COUNTS_PER_1_TILE_STANDARD  = 3500;
+        // static final int        COUNTS_PER_1_TILE_STRAFE    = 4000;
 
         // Define constants for goBilda Drivetrain
         // TBD...
 
-        // Variables to detect if Letter buttons newly pressed or already pressed
-        boolean gp1ButtonACurrentState = false;
-        boolean gp1ButtonBCurrentState = false;
-        boolean gp1ButtonXCurrentState = false;
-        boolean gp1ButtonYCurrentState = false;
-        boolean gp1ButtonALastState = false;
-        boolean gp1ButtonBLastState = false;
-        boolean gp1ButtonXLastState = false;
-        boolean gp1ButtonYLastState = false;
-
-        // Variables to detect if DPAD buttons newly pressed or already pressed
-        boolean gp1DpadUpCurrentState = false;
-        boolean gp1DpadUpLastState = false;
-        boolean gp1DpadRightCurrentState = false;
-        boolean gp1DpadRightLastState = false;
-        boolean gp1DpadDownCurrentState = false;
-        boolean gp1DpadDownLastState = false;
-        boolean gp1DpadLeftCurrentState = false;
-        boolean gp1DpadLeftLastState = false;
-
         // Setup variables used during driving loop
         // Drive wheel power to set motor speed and display telemetry
-        double leftPower = 0.0;
-        double rightPower = 0.0;
-        double drive1 = 0.0;
-        double drive2 = 0.0;
-        double turn1 = 0.0;
-        double turn2 = 0.0;
+        // double leftPower = 0.0;
+        // double rightPower = 0.0;
+        // double drive1 = 0.0;
+        // double drive2 = 0.0;
+        // double turn1 = 0.0;
+        // double turn2 = 0.0;
         boolean buttonGridDriving = false;
         boolean buttonGridDrivingForward = false;
         boolean joystickGridStrafing = false;
         boolean joystickGridTurning = false;
-        int startMotorCounts = 0;
-        int stopMotorCounts = 0;
+        // int startMotorCounts = 0;
+        // int stopMotorCounts = 0;
 
         @Override
         public void runOpMode() {
 
-            ppb.frontLeft = hardwareMap.get(DcMotor.class, "motor0");
-            ppb.frontRight = hardwareMap.get(DcMotor.class, "motor1");
-            ppb.backLeft = hardwareMap.get(DcMotor.class, "motor2");
-            ppb.backRight = hardwareMap.get(DcMotor.class, "motor3");
+            // Make accessible the methods defined in PowerPlayBot
+            // Pass the objects that are only defined once the OpMode starts running
+            PowerPlayBot ppb = new PowerPlayBot(this, hardwareMap);
 
-            // initialize values for IMU
-            ppb.parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
-            ppb.imu = hardwareMap.get(BNO055IMU.class, "imu");
-            ppb.imu.initialize(ppb.parameters);
-
-            // Initialize the drive system variables.
-
+            // Initialize the drive system variables
             try {
                 ppb.init();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+            // Set initial Bot Coordinates on the field
+            ppb.gamepadSetCurrentBotCoordinates();
+
             // Wait for the game to start (driver presses PLAY) Display IMU value while waiting
             while (opModeInInit()) {
-                telemetry.addData(">", "Robot Heading = %4.0f", ppb.getRawHeading());
+                telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
+                telemetry.addData("Bot Coordinates", "X: %2d Y: %2d", ppb.currentBotCol, ppb.currentBotRow);
                 telemetry.update();
             }
 
-            // Play just pressed, reset Heading and game timer
-            ppb.resetHeading();
+            // PLAY just pressed on Driver Station, reset Heading and game timer
             ppb.runtime.reset();
 
             // run until the end of the match (driver presses STOP)
@@ -146,7 +116,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                 // If buttonGrid driving, decide if the bot has driven far enough to stop, ignore all gamepad buttons
                 if (buttonGridDriving) {
                     if (buttonGridDrivingForward) {
-                        if (ppb.frontLeft.getCurrentPosition() >= stopMotorCounts) {
+                        if (ppb.frontLeft.getCurrentPosition() >= ppb.stopMotorCounts) {
                             buttonGridDriving = false;
                             buttonGridDrivingForward = false;
                             ppb.stop();
@@ -158,7 +128,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                              */
                         }
                     } else {
-                        if (ppb.frontLeft.getCurrentPosition() <= stopMotorCounts) {
+                        if (ppb.frontLeft.getCurrentPosition() <= ppb.stopMotorCounts) {
                             buttonGridDriving = false;
                             buttonGridDrivingForward = false;
                             ppb.stop();
@@ -174,82 +144,82 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                     // If not buttonGrid driving, check if N/S/E/W buttons newly pressed, if so start buttonGrid driving
 
                     // Buttons for driving one field tile North / South / East / West
-                    gp1DpadUpLastState = gp1DpadUpCurrentState;
-                    gp1DpadUpCurrentState = gamepad1.dpad_up;
-                    gp1DpadRightLastState = gp1DpadRightCurrentState;
-                    gp1DpadRightCurrentState = gamepad1.dpad_right;
-                    gp1DpadDownLastState = gp1DpadDownCurrentState;
-                    gp1DpadDownCurrentState = gamepad1.dpad_down;
-                    gp1DpadLeftLastState = gp1DpadLeftCurrentState;
-                    gp1DpadLeftCurrentState = gamepad1.dpad_left;
+                    ppb.gp1DpadUpLastState = ppb.gp1DpadUpCurrentState;
+                    ppb.gp1DpadUpCurrentState = gamepad1.dpad_up;
+                    ppb.gp1DpadRightLastState = ppb.gp1DpadRightCurrentState;
+                    ppb.gp1DpadRightCurrentState = gamepad1.dpad_right;
+                    ppb.gp1DpadDownLastState = ppb.gp1DpadDownCurrentState;
+                    ppb.gp1DpadDownCurrentState = gamepad1.dpad_down;
+                    ppb.gp1DpadLeftLastState = ppb.gp1DpadLeftCurrentState;
+                    ppb.gp1DpadLeftCurrentState = gamepad1.dpad_left;
 
                     // Drive North by pressing dpad_up, if button state different from last loop then button is newly pressed
-                    if (gp1DpadUpCurrentState && !gp1DpadUpLastState) {
+                    if (ppb.gp1DpadUpCurrentState && !ppb.gp1DpadUpLastState) {
                         buttonGridDriving = true;
                         buttonGridDrivingForward = true;
+                        ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
+                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.COUNTS_PER_1_TILE_STANDARD;
                         // ppb.driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
-                        startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        stopMotorCounts = startMotorCounts + COUNTS_PER_1_TILE_STANDARD;
-                        drive1 = 1.0;
-                        drive2 = 0.0;
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                        ppb.drive1 = 1.0;
+                        ppb.drive2 = 0.0;
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(leftPower);
-                        ppb.backRight.setPower(rightPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.leftPower);
+                        ppb.backRight.setPower(ppb.rightPower);
                     }
                     // Drive East by pressing dpad_right
-                    if (gp1DpadRightCurrentState && !gp1DpadRightLastState) {
+                    if (ppb.gp1DpadRightCurrentState && !ppb.gp1DpadRightLastState) {
                         buttonGridDriving = true;
                         buttonGridDrivingForward = true;
                         // ppb.strafeStraight(DRIVE_SPEED,24.0, -90.0);    // Strafe Right 24"
-                        startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        stopMotorCounts = startMotorCounts + COUNTS_PER_1_TILE_STRAFE;
-                        drive1 = 0.0;
-                        drive2 = -1.0;
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                        ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
+                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.COUNTS_PER_1_TILE_STRAFE;
+                        ppb.drive1 = 0.0;
+                        ppb.drive2 = -1.0;
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(leftPower);
-                        ppb.backRight.setPower(rightPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.leftPower);
+                        ppb.backRight.setPower(ppb.rightPower);
                     }
                     // Drive South by pressing dpad_down
-                    if (gp1DpadDownCurrentState && !gp1DpadDownLastState) {
+                    if (ppb.gp1DpadDownCurrentState && !ppb.gp1DpadDownLastState) {
                         buttonGridDriving = true;
                         buttonGridDrivingForward = false;
                         // ppb.driveStraight(DRIVE_SPEED,-24.0, 0.0);    // Drive Backward 24"
-                        startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        stopMotorCounts = startMotorCounts - COUNTS_PER_1_TILE_STANDARD;
-                        drive1 = -1.0;
-                        drive2 = 0.0;
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                        ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
+                        ppb.stopMotorCounts = ppb.startMotorCounts - ppb.COUNTS_PER_1_TILE_STANDARD;
+                        ppb.drive1 = -1.0;
+                        ppb.drive2 = 0.0;
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(leftPower);
-                        ppb.backRight.setPower(rightPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.leftPower);
+                        ppb.backRight.setPower(ppb.rightPower);
                     }
                     // Drive West by pressing dpad_left
-                    if (gp1DpadLeftCurrentState && !gp1DpadLeftLastState) {
+                    if (ppb.gp1DpadLeftCurrentState && !ppb.gp1DpadLeftLastState) {
                         buttonGridDriving = true;
                         buttonGridDrivingForward = false;
                         // ppb.strafeStraight(DRIVE_SPEED,24.0, 90.0);    // Strafe Left 24"
-                        startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        stopMotorCounts = startMotorCounts - COUNTS_PER_1_TILE_STRAFE;
-                        drive1 = 0.0;
-                        drive2 = 1.0;
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                        ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
+                        ppb.stopMotorCounts = ppb.startMotorCounts - ppb.COUNTS_PER_1_TILE_STRAFE;
+                        ppb.drive1 = 0.0;
+                        ppb.drive2 = 1.0;
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(leftPower);
-                        ppb.backRight.setPower(rightPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.leftPower);
+                        ppb.backRight.setPower(ppb.rightPower);
                     }
                 }
 
@@ -258,41 +228,41 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
                     // POV Mode uses left stick to go forward, and right stick to turn.
                     // - This uses basic math to combine motions and is easier to drive straight.
-                    drive1 = -gamepad1.left_stick_y;
-                    drive2 = -gamepad1.left_stick_x;
+                    ppb.drive1 = -gamepad1.left_stick_y;
+                    ppb.drive2 = -gamepad1.left_stick_x;
                     // turn1 = -gamepad1.right_stick_x;
                     // turn2 = -gamepad1.right_stick_y;
 
                     // If left joystick is deflected at all, do mecanum strafe driving
-                    if ((drive1 != 0.0) || (drive2 != 0.0)){
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                    if ((ppb.drive1 != 0.0) || (ppb.drive2 != 0.0)){
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
 
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(leftPower);
-                        ppb.backRight.setPower(rightPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.leftPower);
+                        ppb.backRight.setPower(ppb.rightPower);
                     } else {
                         // Only if left joystick is not deflected, check right joystick for rotation driving
                         // drive1 = -gamepad1.right_stick_y;
-                        drive2 = -gamepad1.right_stick_x;
-                        leftPower = Range.clip(drive1 + drive2, -1.0, 1.0);
-                        rightPower = Range.clip(drive1 - drive2, -1.0, 1.0);
+                        ppb.drive2 = -gamepad1.right_stick_x;
+                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
 
                         // Send calculated power to wheels
-                        ppb.frontLeft.setPower(rightPower);
-                        ppb.frontRight.setPower(leftPower);
-                        ppb.backLeft.setPower(rightPower);
-                        ppb.backRight.setPower(leftPower);
+                        ppb.frontLeft.setPower(ppb.rightPower);
+                        ppb.frontRight.setPower(ppb.leftPower);
+                        ppb.backLeft.setPower(ppb.rightPower);
+                        ppb.backRight.setPower(ppb.leftPower);
 
                     }
                 }
 
                 // Show the elapsed game time and wheel power.
                 telemetry.addData("Status:",  "Run Time: " + ppb.runtime.toString());
-                telemetry.addData("Wheel Power:", "Left: %.2f Right: %.2f", leftPower, rightPower);
-                telemetry.addData("Counts:", "Start:%5d Stop:%5d", startMotorCounts, stopMotorCounts);
+                telemetry.addData("Wheel Power:", "Left: %.2f Right: %.2f", ppb.leftPower, ppb.rightPower);
+                telemetry.addData("Counts:", "Start:%5d Stop:%5d", ppb.startMotorCounts, ppb.stopMotorCounts);
                 telemetry.addData("Pos:", "LF:%5d RF:%5d LB:%5d RB:%5d", ppb.frontLeft.getCurrentPosition(), ppb.frontRight.getCurrentPosition(), ppb.backLeft.getCurrentPosition(), ppb.backRight.getCurrentPosition());
                 telemetry.update();
             }
