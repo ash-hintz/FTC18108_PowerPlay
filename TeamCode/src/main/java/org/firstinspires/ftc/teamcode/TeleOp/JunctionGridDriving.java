@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
     import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+    import com.qualcomm.robotcore.hardware.DcMotor;
     import com.qualcomm.robotcore.util.Range;
     import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -80,6 +81,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
         boolean buttonGridDrivingForward = false;
         boolean joystickGridStrafing = false;
         boolean joystickGridTurning = false;
+        int numUpPressed = 0;
         // int startMotorCounts = 0;
         // int stopMotorCounts = 0;
 
@@ -97,12 +99,17 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                 e.printStackTrace();
             }
 
+            ppb.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            ppb.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            ppb.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            ppb.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
             // Set initial Bot Coordinates on the field
-            ppb.gamepadSetCurrentBotCoordinates();
+            // ppb.gamepadSetCurrentBotCoordinates();
 
             // Wait for the game to start (driver presses PLAY) Display IMU value while waiting
             while (opModeInInit()) {
-                telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
+                //telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
                 telemetry.addData("Bot Coordinates", "X: %2d Y: %2d", ppb.currentBotCol, ppb.currentBotRow);
                 telemetry.update();
             }
@@ -155,20 +162,33 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
                     // Drive North by pressing dpad_up, if button state different from last loop then button is newly pressed
                     if (ppb.gp1DpadUpCurrentState && !ppb.gp1DpadUpLastState) {
+
+                        numUpPressed++;
+                        //ppb.linearSlides.setPower(0.5);
+
                         buttonGridDriving = true;
                         buttonGridDrivingForward = true;
                         ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.COUNTS_PER_1_TILE_STANDARD;
+                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.STANDARD_COUNTS_PER_1_TILE;
+
+                        for (int i = 0; i < numUpPressed; i++) {
+                            ppb.drive1 = 0.2;
+                            ppb.drive2 = 0.0;
+                            ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
+                            ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
+                            // Send calculated power to wheels
+                            ppb.frontLeft.setPower(ppb.rightPower);
+                            ppb.frontRight.setPower(ppb.leftPower);
+                            ppb.backLeft.setPower(ppb.leftPower);
+                            ppb.backRight.setPower(ppb.rightPower);
+                            numUpPressed--;
+                        }
+
                         // ppb.driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
-                        ppb.drive1 = 1.0;
-                        ppb.drive2 = 0.0;
-                        ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
-                        ppb.rightPower = Range.clip(ppb.drive1 - ppb.drive2, -1.0, 1.0);
-                        // Send calculated power to wheels
-                        ppb.frontLeft.setPower(ppb.rightPower);
-                        ppb.frontRight.setPower(ppb.leftPower);
-                        ppb.backLeft.setPower(ppb.leftPower);
-                        ppb.backRight.setPower(ppb.rightPower);
+
+                    }
+                    else {
+                        //ppb.linearSlides.setPower(0.0);
                     }
                     // Drive East by pressing dpad_right
                     if (ppb.gp1DpadRightCurrentState && !ppb.gp1DpadRightLastState) {
@@ -176,7 +196,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                         buttonGridDrivingForward = true;
                         // ppb.strafeStraight(DRIVE_SPEED,24.0, -90.0);    // Strafe Right 24"
                         ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.COUNTS_PER_1_TILE_STRAFE;
+                        ppb.stopMotorCounts = ppb.startMotorCounts + ppb.STRAFE_COUNTS_PER_1_TILE;
                         ppb.drive1 = 0.0;
                         ppb.drive2 = -1.0;
                         ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
@@ -188,7 +208,9 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                         ppb.backRight.setPower(ppb.rightPower);
                     }
                     // Drive South by pressing dpad_down
-                    if (ppb.gp1DpadDownCurrentState && !ppb.gp1DpadDownLastState) {
+                    if (ppb.gp1DpadDownCurrentState /*&& !ppb.gp1DpadDownLastState*/) {
+                        //ppb.linearSlides.setPower(-1);
+                        /*
                         buttonGridDriving = true;
                         buttonGridDrivingForward = false;
                         // ppb.driveStraight(DRIVE_SPEED,-24.0, 0.0);    // Drive Backward 24"
@@ -203,6 +225,10 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                         ppb.frontRight.setPower(ppb.leftPower);
                         ppb.backLeft.setPower(ppb.leftPower);
                         ppb.backRight.setPower(ppb.rightPower);
+                         */
+                    }
+                    else {
+                        //ppb.linearSlides.setPower(0.0);
                     }
                     // Drive West by pressing dpad_left
                     if (ppb.gp1DpadLeftCurrentState && !ppb.gp1DpadLeftLastState) {
@@ -210,7 +236,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                         buttonGridDrivingForward = false;
                         // ppb.strafeStraight(DRIVE_SPEED,24.0, 90.0);    // Strafe Left 24"
                         ppb.startMotorCounts = ppb.frontLeft.getCurrentPosition();
-                        ppb.stopMotorCounts = ppb.startMotorCounts - ppb.COUNTS_PER_1_TILE_STRAFE;
+                        ppb.stopMotorCounts = ppb.startMotorCounts - ppb.STRAFE_COUNTS_PER_1_TILE;
                         ppb.drive1 = 0.0;
                         ppb.drive2 = 1.0;
                         ppb.leftPower = Range.clip(ppb.drive1 + ppb.drive2, -1.0, 1.0);
@@ -257,6 +283,14 @@ package org.firstinspires.ftc.teamcode.TeleOp;
                         ppb.backRight.setPower(ppb.leftPower);
 
                     }
+                }
+
+                if (gamepad1.left_bumper) {
+                    ppb.turret.setPower(0.1);
+                } else if (gamepad1.right_bumper) {
+                    ppb.turret.setPower(-0.1);
+                } else {
+                    ppb.turret.setPower(0.0);
                 }
 
                 // Show the elapsed game time and wheel power.

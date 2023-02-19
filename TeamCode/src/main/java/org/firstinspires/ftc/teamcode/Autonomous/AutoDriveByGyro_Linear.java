@@ -101,9 +101,16 @@ public class AutoDriveByGyro_Linear extends LinearOpMode {
             e.printStackTrace();
         }
 
+        // Set initial Bot Coordinates on the field
+        ppb.currentBotCol = ppb.RED_LEFT_START_COL;
+        ppb.currentBotRow = ppb.RED_LEFT_START_ROW;
+        ppb.currentAlliance = PowerPlayBot.Alliance.RED;
+
         // Wait for the game to start (driver presses PLAY) Display IMU value while waiting
         while (opModeInInit()) {
-            telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
+            telemetry.addData("Current Alliance", "%s", ppb.currentAlliance);
+            //telemetry.addData("Robot Heading ", "= %4.0f", ppb.getRawHeading());
+            telemetry.addData("Start Position",  "X: %2d Y: %2d", ppb.currentBotCol, ppb.currentBotRow);
             telemetry.update();
         }
 
@@ -128,6 +135,25 @@ public class AutoDriveByGyro_Linear extends LinearOpMode {
         ppb.holdHeading(TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for 1 second
 
         ppb.driveStraight(DRIVE_SPEED,-48.0, 0.0);    // Drive in Reverse 48" (should return to approx. staring position)
+
+        /*
+        ppb.strafeLeft(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+        ppb.strafeLeft(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+        ppb.strafeLeft(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+
+        sleep(1000);
+        ppb.strafeRight(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+        ppb.strafeRight(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+        ppb.strafeRight(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
+        ppb.strafeRight(DRIVE_SPEED, 12.0);                    // Strafe Right 12" - 1 coordinate in positive Y
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);
+         */
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

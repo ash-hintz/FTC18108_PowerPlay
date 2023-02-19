@@ -34,6 +34,7 @@ import static org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot.TURN_SPEED
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot;
 
@@ -41,9 +42,9 @@ import org.firstinspires.ftc.teamcode.DefineRobot.PowerPlayBot;
  Autonomous code for competition - PowerPlay season
  */
 
-@Autonomous(name="Red_Right", group="Robot")
+@Autonomous(name="Auto_Test", group="Robot")
 // @Disabled
-public class Red_Right extends LinearOpMode {
+public class Auto_Test extends LinearOpMode {
 
     @Override
     public void runOpMode() {
@@ -58,6 +59,11 @@ public class Red_Right extends LinearOpMode {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ppb.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ppb.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ppb.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ppb.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set initial Bot Coordinates on the field
         ppb.currentBotCol = ppb.RED_RIGHT_START_COL;
@@ -79,85 +85,52 @@ public class Red_Right extends LinearOpMode {
         /*
          Autonomous code goes here
         */
-        ppb.coneStackDetect(true, false);
+
+
+        // ppb.driveStraightGyro(24,0.1);
+
+        ppb.frontLeft.setPower(0.1);
+        sleep(2000);
+        ppb.frontLeft.setPower(-0.1);
+        sleep(2000);
+        ppb.frontLeft.setPower(0);
+
+        ppb.frontRight.setPower(0.1);
+        sleep(2000);
+        ppb.frontRight.setPower(-0.1);
+        sleep(2000);
+        ppb.frontRight.setPower(0);
+
+        ppb.backLeft.setPower(0.1);
+        sleep(2000);
+        ppb.backLeft.setPower(-0.1);
+        sleep(2000);
+        ppb.backLeft.setPower(0);
+
+        ppb.backRight.setPower(0.1);
+        sleep(2000);
+        ppb.backRight.setPower(-0.1);
+        sleep(2000);
+        ppb.backRight.setPower(0);
 
         /*
         // Move from starting position against the wall to the center of the current tile
         ppb.driveStraight(DRIVE_SPEED, 4.0, 0.0);    // Drive Forward 4"
         ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
 
-        // Vision Detect for the Sleeve goes here
+        ppb.strafeRight(DRIVE_SPEED,2*12.0);
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
 
-        // Drive to the closest stack of cones for our Alliance color
-        // Drive to all the High Junctions + closest Medium Junction to deposit cones
+        ppb.strafeLeft(DRIVE_SPEED,2*12.0);
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
 
-        // Get Stack Cone #5
-        ppb.driveToCoordinate(ppb.RED_FRONT_CONE_STACK_COL, ppb.RED_FRONT_CONE_STACK_ROW);
-        ppb.turnToHeading(TURN_SPEED,  -90.0);               // Turn  CCW  to  45 Degrees
-        ppb.holdHeading(TURN_SPEED,  -90.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
-        // ppb.openClaw();
-        // ppb.moveSlidesToHeight(ppb.STACK_CONE_5);
-        // ppb.closeClaw();
-        ppb.turnToHeading(TURN_SPEED,  0.0);               // Turn  CCW  to  45 Degrees
-        ppb.holdHeading(TURN_SPEED,  0.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
-
-        // Drive to High Junction (5,6)
-        ppb.driveToCoordinate(4, 6);
-        ppb.driveToCoordinate(5, 6);
-        // ppb.moveSlidesToHeight(ppb.JUNCTION_HIGH);
-        // ppb.openClaw();
-
-        // Get Stack Cone #4
-        ppb.driveToCoordinate(4, 6);
-        ppb.driveToCoordinate(ppb.RED_FRONT_CONE_STACK_COL, ppb.RED_FRONT_CONE_STACK_ROW);
-
-        /*
-        // ppb.moveSlidesToHeight(ppb.STACK_CONE_4);
-        //ppb.closeClaw();
-        // Drive to High Junction (7,4)
-        // ppb.driveToCoordinate(6, 4);
-        //ppb.moveSlidesToHeight(ppb.JUNCTION_HIGH);
-        // ppb.driveToCoordinate(7, 4);
-        //ppb.openClaw();
-
-        // Get Stack Cone #3
-        ppb.driveToCoordinate(6, 4);
-        //ppb.moveSlidesToHeight(ppb.STACK_CONE_3);
-        ppb.driveToCoordinate(ppb.RED_FRONT_CONE_STACK_COL, ppb.RED_FRONT_CONE_STACK_ROW);
-        //ppb.closeClaw();
-        // Drive to High Junction (3,4)
-        ppb.driveToCoordinate(4, 4);
-        //ppb.moveSlidesToHeight(ppb.JUNCTION_HIGH);
-        ppb.driveToCoordinate(3, 4);
-        //ppb.openClaw();
-
-        // Get Stack Cone #2
-        ppb.driveToCoordinate(4, 4);
-        //ppb.moveSlidesToHeight(ppb.STACK_CONE_2);
-        ppb.driveToCoordinate(ppb.RED_FRONT_CONE_STACK_COL, ppb.RED_FRONT_CONE_STACK_ROW);
-        //ppb.closeClaw();
-        // Drive to High Junction (5,2)
-        ppb.driveToCoordinate(4, 2);
-        //ppb.moveSlidesToHeight(ppb.JUNCTION_HIGH);
-        ppb.driveToCoordinate(5, 2);
-        //ppb.openClaw();
-
-        // Get Stack Cone #1
-        ppb.driveToCoordinate(4, 2);
-        //ppb.moveSlidesToHeight(ppb.STACK_CONE_1);
-        ppb.driveToCoordinate(ppb.RED_FRONT_CONE_STACK_COL, ppb.RED_FRONT_CONE_STACK_ROW);
-        //ppb.closeClaw();
-        // Drive to Medium Junction (2,2)
-        ppb.driveToCoordinate(4, 2);
-        //ppb.moveSlidesToHeight(ppb.JUNCTION_HIGH);
-        ppb.driveToCoordinate(3, 2);
-        //ppb.openClaw();
-
-        // Park in the spot indicated on the Sleeve end of Autonomous
-        ppb.driveToCoordinate(2, 2);
-        //ppb.moveSlidesToHeight(ppb.JUNCTION_GROUND);
+        ppb.driveStraight(DRIVE_SPEED, -4.0, 0.0);    // Drive Forward 4"
+        ppb.holdHeading(TURN_SPEED, 0.0, 0.5);      // Hold 0 Deg heading for a 0.25 second
          */
 
+        //ppb.driveStraightGyro(24,0.1);
+
+        // Vision Detect for the Sleeve goes here
 
         telemetry.addData("Current Alliance", "%s", ppb.currentAlliance);
         telemetry.addData("Current Position", "X: %2d Y: %2d", ppb.currentBotCol, ppb.currentBotRow);
